@@ -6,7 +6,7 @@
 /*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/29 15:18:03 by sruff             #+#    #+#             */
-/*   Updated: 2024/07/01 17:32:22 by sruff            ###   ########.fr       */
+/*   Updated: 2024/07/05 00:24:20 by sruff            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,35 @@ static void	print_status(t_data *data, int id, char *status)
 	pthread_mutex_unlock(&data->print_mutex);
 }
 
+static void philo_eat(t_philosopher *philo) //or t_data instead
+{
+	t_data *data;
+	data = philo->data;
+	if (philo->id % 2 == 0) // find condition or procedure for picking up forks to preven deadlock
+	{
+		pthread_mutex_lock(&data->forks[philo->left_fork]);
+		print_status(&data, philo->id, "took left fork");
+		pthread_mutex_lock(&data->forks[philo->right_fork]);
+		print_status(&data, philo->id, "took right fork");
+		//grab fork L
+		//grab fork R
+		pthread_mutex_unlock(&data->forks[philo->left_fork]);
+		pthread_mutex_unlock(&data->forks[philo->right_fork]);
+		print_status(&data, philo->id, "is eating");
+	}
+}
+
+static void philo_lifecycle(void *arg)
+{
+	t_philosopher *philo;
+	philo =(t_philosopher *)arg;
+	//eating
+	philo_eat(philo);
+	//print status insert arg (philo ID) from phread create into it
+	//sleep
+	//thinking
+}
+
 int	init_data(t_data *data, int argc, char **argv)
 {
 	int			i;
@@ -82,7 +111,7 @@ int	init_data(t_data *data, int argc, char **argv)
 	data->start_time = get_time();
 	while (i < data->num_philosophers)
 	{
-		if (pthread_mutex_init(&data->forks[i], NULL) != 0)
+		if (pthread_mutex_init(&data->forks[i], NULL) != 0) // init mutex first before pthread_create
 			return (0);
 		data->philosophers[i].id = i;
 		data->philosophers[i].left_fork = i;
@@ -102,6 +131,7 @@ int	main(int argc, char **argv)
 	t_data		data;
 	pthread_t	*threads;
 	pthread_t	monitor;
+	int			i;
 
 	if (argc != 5 && argc != 6)
 	{
@@ -116,6 +146,11 @@ int	main(int argc, char **argv)
 	threads = malloc(sizeof(pthread_t) * data.num_philosophers);
 	if (!threads)
 		return (1);
+	i = 0;
+	while(i < data.num_philosophers)
+	{
+		pthread_create(threads[i], NULL, philo_lifecycle, &data.philosophers[i]);
+	}
 	while (!data.simulation_stop)
 	{
 		print_status(&data, data.philosophers->id, "is sleeping");

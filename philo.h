@@ -6,7 +6,7 @@
 /*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/29 15:17:58 by sruff             #+#    #+#             */
-/*   Updated: 2024/07/01 17:19:43 by sruff            ###   ########.fr       */
+/*   Updated: 2024/07/04 23:59:53 by sruff            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@
 # include <pthread.h>
 # include <unistd.h>
 # include <sys/time.h>
-
 
 typedef struct s_philosopher {
 	int id;
@@ -38,6 +37,7 @@ typedef struct s_data {
 	pthread_mutex_t	print_mutex;
 	// pthread_mutex_t	meal_mutex; //prob stupid idea
 	t_philosopher	*philosophers;
+	//t_philosopher philosophers[200]; ???? either really smart or stupid
 	pthread_mutex_t	*forks;
 	int	simulation_stop;
 } t_data;
