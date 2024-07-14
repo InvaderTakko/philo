@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
+/*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/29 15:18:03 by sruff             #+#    #+#             */
-/*   Updated: 2024/07/05 00:24:20 by sruff            ###   ########.fr       */
+/*   Updated: 2024/07/13 13:02:03 by stefan           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,18 +68,18 @@ static void philo_eat(t_philosopher *philo) //or t_data instead
 	if (philo->id % 2 == 0) // find condition or procedure for picking up forks to preven deadlock
 	{
 		pthread_mutex_lock(&data->forks[philo->left_fork]);
-		print_status(&data, philo->id, "took left fork");
+		print_status(data, philo->id, "took left fork");
 		pthread_mutex_lock(&data->forks[philo->right_fork]);
-		print_status(&data, philo->id, "took right fork");
+		print_status(data, philo->id, "took right fork");
 		//grab fork L
 		//grab fork R
 		pthread_mutex_unlock(&data->forks[philo->left_fork]);
 		pthread_mutex_unlock(&data->forks[philo->right_fork]);
-		print_status(&data, philo->id, "is eating");
+		print_status(data, philo->id, "is eating");
 	}
 }
 
-static void philo_lifecycle(void *arg)
+static void *philo_lifecycle(void *arg)
 {
 	t_philosopher *philo;
 	philo =(t_philosopher *)arg;
@@ -88,6 +88,7 @@ static void philo_lifecycle(void *arg)
 	//print status insert arg (philo ID) from phread create into it
 	//sleep
 	//thinking
+	return (NULL);
 }
 
 int	init_data(t_data *data, int argc, char **argv)
@@ -149,7 +150,7 @@ int	main(int argc, char **argv)
 	i = 0;
 	while(i < data.num_philosophers)
 	{
-		pthread_create(threads[i], NULL, philo_lifecycle, &data.philosophers[i]);
+		pthread_create(&threads[i], NULL, philo_lifecycle, &data.philosophers[i]);
 	}
 	while (!data.simulation_stop)
 	{
