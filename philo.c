@@ -6,7 +6,7 @@
 /*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/29 15:18:03 by sruff             #+#    #+#             */
-/*   Updated: 2024/07/14 17:37:48 by sruff            ###   ########.fr       */
+/*   Updated: 2024/07/14 18:23:17 by sruff            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,7 @@ static void	*monitor(void *arg)
 	while (!data->simulation_stop)
 	{
 		tummies_full = 1;
+		i = 0;
 		while (i < data->num_philosophers)
 		{
 			time = get_time();
@@ -110,10 +111,8 @@ static void philo_eat(t_philosopher *philo) //or t_data instead
 		print_status(data, philo->id, "took right fork");
 		//grab fork L
 		//grab fork R
-		pthread_mutex_unlock(&data->forks[philo->left_fork]);
-		pthread_mutex_unlock(&data->forks[philo->right_fork]);
-		print_status(data, philo->id, "is eating");
-		philo->last_meal_time = get_time();
+
+
 	}
 	else
 	{
@@ -123,14 +122,16 @@ static void philo_eat(t_philosopher *philo) //or t_data instead
 		print_status(data, philo->id, "took right fork");
 		//grab fork L
 		//grab fork R
-		pthread_mutex_unlock(&data->forks[philo->left_fork]);
-		pthread_mutex_unlock(&data->forks[philo->right_fork]);
-		print_status(data, philo->id, "is eating");
-		philo->last_meal_time = get_time();
+	
 	}
+	print_status(data, philo->id, "is eating");
+	
+	philo->last_meal_time = get_time();
 	usleep(data->time_to_eat * 1000);
 	philo->eat_count++;
-	// maybe i need meal_mutex to 
+	pthread_mutex_unlock(&data->forks[philo->left_fork]);
+	pthread_mutex_unlock(&data->forks[philo->right_fork]);
+	// maybe i need meal_mutex to protect eat_count
 }
 
 static void *philo_lifecycle(void *arg)
@@ -169,6 +170,7 @@ int	init_data(t_data *data, int argc, char **argv)
 	data->time_to_die = ft_atoi(argv[2]);
 	data->time_to_eat = ft_atoi(argv[3]);
 	data->time_to_sleep = ft_atoi(argv[4]);
+	data->must_eat_count = -1;
 	if (argc == 6)
 		data->must_eat_count = ft_atoi(argv[5]);
 	data->simulation_stop = 0;
@@ -183,7 +185,7 @@ int	init_data(t_data *data, int argc, char **argv)
 			return (0);
 		data->philosophers[i].id = i;
 		data->philosophers[i].left_fork = i;
-		data->philosophers[i].right_fork = i + 1;
+		data->philosophers[i].right_fork = (i + 1) % data->num_philosophers;
 		data->philosophers[i].eat_count = 0;
 		data->philosophers[i].last_meal_time = data->start_time; //or get_time();
 		data->philosophers[i].data = data;
@@ -198,7 +200,7 @@ int	main(int argc, char **argv)
 {
 	t_data		data;
 	pthread_t	*threads;
-	pthread_t	monitor;
+	pthread_t	monitor_thread;
 	int			i;
 
 	if (argc != 5 && argc != 6)
@@ -215,18 +217,22 @@ int	main(int argc, char **argv)
 	if (!threads)
 		return (1);
 	i = 0;
+	pthread_create(&monitor_thread, NULL, monitor, &data);
+	
 	while(i < data.num_philosophers)
 	{
 		pthread_create(&threads[i], NULL, philo_lifecycle, &data.philosophers[i]);
 		i++;
 	}
 	i = 0;
+	
 	while(i < data.num_philosophers)
 	{
 		pthread_join(threads[i], NULL);
 		i ++;
 	}
-	pthread_join(monitor, NULL);
+	pthread_join(monitor_thread, NULL);
+
 	// while (!data.simulation_stop)
 	// {
 	// 	print_status(&data, data.philosophers->id, "is sleeping");
