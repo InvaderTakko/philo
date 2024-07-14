@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: stefan <stefan@student.42.fr>              +#+  +:+       +#+        */
+/*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/29 15:18:03 by sruff             #+#    #+#             */
-/*   Updated: 2024/07/13 13:02:03 by stefan           ###   ########.fr       */
+/*   Updated: 2024/07/14 17:37:48 by sruff            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,8 +57,45 @@ static void	print_status(t_data *data, int id, char *status)
 {
 	pthread_mutex_lock(&data->print_mutex);
 	if (!data->simulation_stop)
-		printf("%lld %d %s\n", get_time() - data->start_time, id + 1, status);
+		printf("%lld %d %s\n", get_time() - data->start_time, (id + 1), status);
 	pthread_mutex_unlock(&data->print_mutex);
+}
+
+static void	*monitor(void *arg)
+{
+	t_data *data;
+	data = (t_data *)arg;
+	int i;
+	int tummies_full;
+	i = 0;
+	long long time;
+	time = 0;
+
+	while (!data->simulation_stop)
+	{
+		tummies_full = 1;
+		while (i < data->num_philosophers)
+		{
+			time = get_time();
+			if (time - data->philosophers[i].last_meal_time >= data->time_to_die)
+			{
+				data->simulation_stop = 1;
+				return (print_status(data, data->philosophers[i].id, "died"), NULL);
+			}
+			if (data->must_eat_count > 0 && data->philosophers[i].eat_count < data->must_eat_count)
+			{
+				tummies_full = 0;
+			}
+			i++;
+		}
+		if (data->must_eat_count > 0 && tummies_full)
+		{
+			data->simulation_stop = 1;
+			return NULL;
+        }
+		usleep(200);
+	}
+	return (NULL);
 }
 
 static void philo_eat(t_philosopher *philo) //or t_data instead
@@ -76,18 +113,48 @@ static void philo_eat(t_philosopher *philo) //or t_data instead
 		pthread_mutex_unlock(&data->forks[philo->left_fork]);
 		pthread_mutex_unlock(&data->forks[philo->right_fork]);
 		print_status(data, philo->id, "is eating");
+		philo->last_meal_time = get_time();
 	}
+	else
+	{
+		pthread_mutex_lock(&data->forks[philo->left_fork]);
+		print_status(data, philo->id, "took left fork");
+		pthread_mutex_lock(&data->forks[philo->right_fork]);
+		print_status(data, philo->id, "took right fork");
+		//grab fork L
+		//grab fork R
+		pthread_mutex_unlock(&data->forks[philo->left_fork]);
+		pthread_mutex_unlock(&data->forks[philo->right_fork]);
+		print_status(data, philo->id, "is eating");
+		philo->last_meal_time = get_time();
+	}
+	usleep(data->time_to_eat * 1000);
+	philo->eat_count++;
+	// maybe i need meal_mutex to 
 }
 
 static void *philo_lifecycle(void *arg)
 {
 	t_philosopher *philo;
+	t_data			*data;
 	philo =(t_philosopher *)arg;
-	//eating
-	philo_eat(philo);
-	//print status insert arg (philo ID) from phread create into it
-	//sleep
-	//thinking
+	data = philo->data;
+
+	if (philo->id % 2 != 0)
+	{
+		usleep(1000);
+	}
+	while (!data->simulation_stop)
+	{
+		//eating
+		philo_eat(philo);
+		//print status insert arg (philo ID) from phread create into it
+		//sleep
+		print_status(philo->data, philo->id, "is sleeping");
+		usleep(philo->data->time_to_sleep * 1000);
+		//thinking
+		print_status(philo->data, philo->id, "is thinking");
+	}
 	return (NULL);
 }
 
@@ -151,12 +218,20 @@ int	main(int argc, char **argv)
 	while(i < data.num_philosophers)
 	{
 		pthread_create(&threads[i], NULL, philo_lifecycle, &data.philosophers[i]);
+		i++;
 	}
-	while (!data.simulation_stop)
+	i = 0;
+	while(i < data.num_philosophers)
 	{
-		print_status(&data, data.philosophers->id, "is sleeping");
-		usleep(data.time_to_sleep * 1000);
-	}	
+		pthread_join(threads[i], NULL);
+		i ++;
+	}
+	pthread_join(monitor, NULL);
+	// while (!data.simulation_stop)
+	// {
+	// 	print_status(&data, data.philosophers->id, "is sleeping");
+	// 	usleep(data.time_to_sleep * 1000);
+	// }	
 	return (0);
 }
 // code from https://code-vault.net/lesson/18ec1942c2da46840693efe9b51eabf6
