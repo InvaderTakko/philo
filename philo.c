@@ -6,7 +6,7 @@
 /*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/29 15:18:03 by sruff             #+#    #+#             */
-/*   Updated: 2024/07/14 18:23:17 by sruff            ###   ########.fr       */
+/*   Updated: 2024/07/18 19:40:58 by sruff            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,21 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/time.h>
+
+void	cleanup(t_data *data, pthread_t *threads)
+{
+	int	i;
+
+	i = 0;
+	while (i < data->num_philosophers)
+	{
+		pthread_mutex_destroy(&data->forks[i++]);
+	}
+	pthread_mutex_destroy(&data->print_mutex);
+	free(data->philosophers);
+	free(data->forks);
+	free(threads);
+}
 
 static int	ft_atoi(const char *str)
 {
@@ -63,98 +78,106 @@ static void	print_status(t_data *data, int id, char *status)
 
 static void	*monitor(void *arg)
 {
-	t_data *data;
-	data = (t_data *)arg;
-	int i;
-	int tummies_full;
-	i = 0;
-	long long time;
-	time = 0;
+	t_data		*data;
+	int			i;
+	int			tummies_full;
+	long long	time;
 
-	while (!data->simulation_stop)
+	i = 0;
+	data = (t_data *)arg;
+	time = 0;
+    while (!data->simulation_stop)
 	{
-		tummies_full = 1;
 		i = 0;
 		while (i < data->num_philosophers)
 		{
 			time = get_time();
 			if (time - data->philosophers[i].last_meal_time >= data->time_to_die)
 			{
+				print_status(data, i, "died");
 				data->simulation_stop = 1;
-				return (print_status(data, data->philosophers[i].id, "died"), NULL);
-			}
-			if (data->must_eat_count > 0 && data->philosophers[i].eat_count < data->must_eat_count)
-			{
-				tummies_full = 0;
+				return (NULL);
 			}
 			i++;
 		}
-		if (data->must_eat_count > 0 && tummies_full)
+		if (data->must_eat_count > 0)
 		{
-			data->simulation_stop = 1;
-			return NULL;
-        }
-		usleep(200);
+			tummies_full = 1;
+			i = 0;
+			while (i < data->num_philosophers)
+			{
+				if (data->philosophers[i].eat_count < data->must_eat_count)
+				{
+					tummies_full = 0;
+					break ;
+				}
+				i++;
+			}
+			if (tummies_full)
+			{
+				data->simulation_stop = 1;
+				return (NULL);
+			}
+		}
+		usleep(1000);
 	}
 	return (NULL);
 }
 
-static void philo_eat(t_philosopher *philo) //or t_data instead
+static int	philo_eat(t_philosopher *philo)
 {
-	t_data *data;
+	t_data	*data;
+
 	data = philo->data;
-	if (philo->id % 2 == 0) // find condition or procedure for picking up forks to preven deadlock
+	pthread_mutex_lock(&data->forks[philo->left_fork]);
+	print_status(data, philo->id, "has taken a fork");
+	if (data->simulation_stop)
 	{
-		pthread_mutex_lock(&data->forks[philo->left_fork]);
-		print_status(data, philo->id, "took left fork");
-		pthread_mutex_lock(&data->forks[philo->right_fork]);
-		print_status(data, philo->id, "took right fork");
-		//grab fork L
-		//grab fork R
-
-
+		pthread_mutex_unlock(&data->forks[philo->left_fork]);
+		return (1);
 	}
-	else
+	if (data->num_philosophers == 1) //there has to be a better way
 	{
-		pthread_mutex_lock(&data->forks[philo->left_fork]);
-		print_status(data, philo->id, "took left fork");
-		pthread_mutex_lock(&data->forks[philo->right_fork]);
-		print_status(data, philo->id, "took right fork");
-		//grab fork L
-		//grab fork R
-	
+		usleep(data->time_to_die * 1000);
+		pthread_mutex_unlock(&data->forks[philo->left_fork]);
+		return (1);
 	}
+	pthread_mutex_lock(&data->forks[philo->right_fork]);
+	print_status(data, philo->id, "has taken a fork");
 	print_status(data, philo->id, "is eating");
-	
 	philo->last_meal_time = get_time();
 	usleep(data->time_to_eat * 1000);
 	philo->eat_count++;
-	pthread_mutex_unlock(&data->forks[philo->left_fork]);
+	//eat mutex?
 	pthread_mutex_unlock(&data->forks[philo->right_fork]);
-	// maybe i need meal_mutex to protect eat_count
+	pthread_mutex_unlock(&data->forks[philo->left_fork]);
+	return (0);
 }
 
 static void *philo_lifecycle(void *arg)
 {
-	t_philosopher *philo;
+	t_philosopher	*philo;
 	t_data			*data;
-	philo =(t_philosopher *)arg;
-	data = philo->data;
 
-	if (philo->id % 2 != 0)
+	philo = (t_philosopher *)arg;
+	data = philo->data;
+	if (philo->id % 2 != 0) //might need to implement a version of this in philo_eat
 	{
 		usleep(1000);
 	}
 	while (!data->simulation_stop)
 	{
-		//eating
-		philo_eat(philo);
-		//print status insert arg (philo ID) from phread create into it
-		//sleep
-		print_status(philo->data, philo->id, "is sleeping");
-		usleep(philo->data->time_to_sleep * 1000);
-		//thinking
-		print_status(philo->data, philo->id, "is thinking");
+		if (philo_eat(philo) != 0)
+			break ;
+		if (data->simulation_stop)
+			break ;
+		print_status(data, philo->id, "is sleeping");
+		usleep(data->time_to_sleep * 1000);
+		if (data->simulation_stop)
+			break ;
+		
+		print_status(data, philo->id, "is thinking");
+		// usleep(philo->data->time_to_think * 1000);
 	}
 	return (NULL);
 }
@@ -232,14 +255,21 @@ int	main(int argc, char **argv)
 		i ++;
 	}
 	pthread_join(monitor_thread, NULL);
+	cleanup(&data, threads);
+    // pthread_mutex_destroy(&data->print_mutex);
+    // free(data->philosophers);
+    // free(data->forks);
+    // free(threads);
+	return (0);
+}
 
 	// while (!data.simulation_stop)
 	// {
 	// 	print_status(&data, data.philosophers->id, "is sleeping");
 	// 	usleep(data.time_to_sleep * 1000);
 	// }	
-	return (0);
-}
+// 	return (0);
+// }
 // code from https://code-vault.net/lesson/18ec1942c2da46840693efe9b51eabf6
 // testing simulatanious acces with/without locking
 
