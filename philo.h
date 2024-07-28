@@ -6,7 +6,7 @@
 /*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/29 15:17:58 by sruff             #+#    #+#             */
-/*   Updated: 2024/07/14 15:30:25 by sruff            ###   ########.fr       */
+/*   Updated: 2024/07/28 18:12:33 by sruff            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ typedef struct s_philosopher {
 	int right_fork;
 	int eat_count;
 	long long last_meal_time;
+	pthread_mutex_t eat_mutex;
 	struct s_data *data;
 } t_philosopher;
 
@@ -35,6 +36,9 @@ typedef struct s_data {
 	int	must_eat_count;
 	long long	start_time;
 	pthread_mutex_t	print_mutex;
+	pthread_mutex_t	data_mutex;
+	// pthread_mutex_t	eat_mutex;
+	pthread_mutex_t stop_mutex;
 	// pthread_mutex_t	meal_mutex; //not sure if i need it
 	t_philosopher	*philosophers;
 	//t_philosopher philosophers[200]; ???? either really smart or stupid
