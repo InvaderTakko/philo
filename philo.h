@@ -6,7 +6,7 @@
 /*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/29 15:17:58 by sruff             #+#    #+#             */
-/*   Updated: 2024/07/28 18:12:33 by sruff            ###   ########.fr       */
+/*   Updated: 2024/08/06 18:50:26 by sruff            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ typedef struct s_data {
 	int	must_eat_count;
 	long long	start_time;
 	pthread_mutex_t	print_mutex;
-	pthread_mutex_t	data_mutex;
 	// pthread_mutex_t	eat_mutex;
 	pthread_mutex_t stop_mutex;
 	// pthread_mutex_t	meal_mutex; //not sure if i need it

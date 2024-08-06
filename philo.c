@@ -6,7 +6,7 @@
 /*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/29 15:18:03 by sruff             #+#    #+#             */
-/*   Updated: 2024/08/06 17:40:31 by sruff            ###   ########.fr       */
+/*   Updated: 2024/08/06 18:51:36 by sruff            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,7 +126,6 @@ static void	*monitor(void *arg)
 	// time = 0;
 	while (1)
 	{
-		//data_mutex_lock?
 		i = 0;
 		all_finished = 1;
 		while (i < data->num_philosophers)
@@ -153,7 +152,6 @@ static void	*monitor(void *arg)
 			// Allow time for the last philosopher to finish eating
 			return (NULL);
 		}
-		//data_mutex_unlock?
 		precise_usleep(250);
 	}
 	return (NULL);
@@ -163,9 +161,7 @@ static int	philo_eat(t_philosopher *philo)
 {
 	t_data	*data;
 
-	pthread_mutex_lock(&data->data_mutex);
 	data = philo->data;
-	pthread_mutex_unlock(&data->data_mutex);
 	pthread_mutex_lock(&data->forks[philo->left_fork]);
 	print_status(data, philo->id, "has taken a fork");
 	if (data->num_philosophers == 1)
@@ -183,8 +179,8 @@ static int	philo_eat(t_philosopher *philo)
 	philo->eat_count++;
 	pthread_mutex_unlock(&philo->eat_mutex);
 	// print_status(data, philo->id, "finished eating");
-	pthread_mutex_unlock(&data->forks[philo->left_fork]);
 	pthread_mutex_unlock(&data->forks[philo->right_fork]);
+	pthread_mutex_unlock(&data->forks[philo->left_fork]);
 	// print_status(data, philo->id, "is sleeping");
 	// precise_usleep(data->time_to_sleep * 1000);
 	// print_status(data, philo->id, "is thinking");
@@ -240,7 +236,6 @@ int	init_data(t_data *data, int argc, char **argv)
 		return (0);
 	pthread_mutex_init(&data->print_mutex, NULL);
 	pthread_mutex_init(&data->stop_mutex, NULL);
-	phread_mutex_init(&data->data_mutex, NULL);
 	data->start_time = get_time();
 	i = 0;
 	while (i < data->num_philosophers)
