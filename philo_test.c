@@ -1,4 +1,4 @@
-#include "philo.h"
+#include "philo_test.h"
 
 int ft_atoi(const char *str)
 {
@@ -163,8 +163,8 @@ void    *monitor(void *arg)
             pthread_mutex_lock(&data->philosophers[i].eat_mutex);
             if (time - data->philosophers[i].last_meal_time > data->time_to_die)
             {
-                print_status(data, i, "died");
 				pthread_mutex_unlock(&data->data_mutex);
+                print_status(data, i, "died");
                 set_stop_simulation(data);
                 pthread_mutex_unlock(&data->philosophers[i].eat_mutex);
                 return (NULL);
@@ -195,10 +195,12 @@ static int  philo_eat(t_philosopher *philo)
     // Always lock the lower-numbered fork first to prevent deadlocks
 	if (data->num_philosophers == 1)
 	{
+		print_status(data, philo->id, "has taken a fork");
 		precise_usleep(data->time_to_die * 1000);
 		return (1);
 	}
-    if (left_fork < right_fork) {
+    if (left_fork < right_fork)
+	{
         pthread_mutex_lock(&data->forks[left_fork]);
         print_status(data, philo->id, "has taken a fork");
         pthread_mutex_lock(&data->forks[right_fork]);
@@ -212,12 +214,14 @@ static int  philo_eat(t_philosopher *philo)
     print_status(data, philo->id, "is eating");
     pthread_mutex_lock(&philo->eat_mutex);
     philo->last_meal_time = get_time();
+	precise_usleep(data->time_to_eat * 1000);
     philo->eat_count++;
     pthread_mutex_unlock(&philo->eat_mutex);
 
-    precise_usleep(data->time_to_eat * 1000);
+    
 
-    if (left_fork < right_fork) {
+    if (left_fork < right_fork)
+	{
         pthread_mutex_unlock(&data->forks[right_fork]);
         pthread_mutex_unlock(&data->forks[left_fork]);
     } else {
@@ -258,6 +262,16 @@ int main(int argc, char **argv)
             argv[0]);
         return (1);
     }
+	i = 1;
+	while ( i < argc)
+	{
+		if (ft_atoi(argv[i]) < 0)
+		{
+			printf("Error: Argument '%s' must not be negative.\n", argv[i]);
+			return (1);
+        }
+		i++;
+	}
     if (!init_data(&data, argc, argv))
     {
         printf("Error initializing data\n");
