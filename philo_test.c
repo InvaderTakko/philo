@@ -144,7 +144,8 @@ int init_data(t_data *data, int argc, char **argv)
     }
     return (1);
 }
-void    *monitor(void *arg)
+
+void *monitor(void *arg)
 {
     t_data      *data;
     int         i;
@@ -156,14 +157,12 @@ void    *monitor(void *arg)
     {
         i = 0;
         all_finished = 1;
-        pthread_mutex_lock(&data->data_mutex);
         while (i < data->num_philosophers)
         {
-            time = get_time();
             pthread_mutex_lock(&data->philosophers[i].eat_mutex);
+            time = get_time();
             if (time - data->philosophers[i].last_meal_time > data->time_to_die)
             {
-				pthread_mutex_unlock(&data->data_mutex);
                 print_status(data, i, "died");
                 set_stop_simulation(data);
                 pthread_mutex_unlock(&data->philosophers[i].eat_mutex);
@@ -177,15 +176,55 @@ void    *monitor(void *arg)
         }
         if (data->must_eat_count > 0 && all_finished)
         {
-			pthread_mutex_unlock(&data->data_mutex);
             set_stop_simulation(data);
             return (NULL);
         }
-        pthread_mutex_unlock(&data->data_mutex);
         precise_usleep(250);
     }
     return (NULL);
 }
+// void    *monitor(void *arg)
+// {
+//     t_data      *data;
+//     int         i;
+//     int         all_finished;
+//     long long   time;
+
+//     data = (t_data *)arg;
+//     while (1)
+//     {
+//         i = 0;
+//         all_finished = 1;
+//         pthread_mutex_lock(&data->data_mutex);
+//         while (i < data->num_philosophers)
+//         {
+//             time = get_time();
+//             pthread_mutex_lock(&data->philosophers[i].eat_mutex);
+//             if (time - data->philosophers[i].last_meal_time > data->time_to_die)
+//             {
+// 				pthread_mutex_unlock(&data->data_mutex);
+//                 print_status(data, i, "died");
+//                 set_stop_simulation(data);
+//                 pthread_mutex_unlock(&data->philosophers[i].eat_mutex);
+//                 return (NULL);
+//             }
+//             if (data->must_eat_count > 0
+//                 && data->philosophers[i].eat_count < data->must_eat_count)
+//                 all_finished = 0;
+//             pthread_mutex_unlock(&data->philosophers[i].eat_mutex);
+//             i++;
+//         }
+//         if (data->must_eat_count > 0 && all_finished)
+//         {
+// 			pthread_mutex_unlock(&data->data_mutex);
+//             set_stop_simulation(data);
+//             return (NULL);
+//         }
+//         pthread_mutex_unlock(&data->data_mutex);
+//         precise_usleep(250);
+//     }
+//     return (NULL);
+// }
 static int  philo_eat(t_philosopher *philo)
 {
     t_data  *data = philo->data;
