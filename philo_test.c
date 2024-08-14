@@ -179,7 +179,7 @@ void *monitor(void *arg)
             set_stop_simulation(data);
             return (NULL);
         }
-        precise_usleep(250);
+        precise_usleep(1000);
     }
     return (NULL);
 }
