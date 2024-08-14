@@ -6,7 +6,7 @@
 /*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/29 15:18:03 by sruff             #+#    #+#             */
-/*   Updated: 2024/08/14 21:34:55 by sruff            ###   ########.fr       */
+/*   Updated: 2024/08/15 00:15:53 by sruff            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 
 static int	check_philosopher_status(t_data *data, int i, long long time)
 {
-	pthread_mutex_lock(&data->philosophers[i].eat_mutex);
-	if (time - data->philosophers[i].last_meal_time > data->time_to_die)
+	// time = get_time();
+	if (time - data->philosophers[i].last_meal_time >= data->time_to_die)
 	{
 		print_status(data, i, "died");
 		set_stop_simulation(data);
@@ -43,6 +43,7 @@ static int	check_all_philosophers(t_data *data)
 	finished_count = 0;
 	while (i < data->num_philosophers)
 	{
+		pthread_mutex_lock(&data->philosophers[i].eat_mutex);
 		time = get_time();
 		status = check_philosopher_status(data, i, time);
 		if (status == 1)
@@ -66,7 +67,7 @@ void	*monitor(void *arg)
 			set_stop_simulation(data);
 			return (NULL);
 		}
-		precise_usleep(1000);
+		precise_usleep(250);
 	}
 	return (NULL);
 }
@@ -79,7 +80,7 @@ void	*philo_lifecycle(void *arg)
 	philo = (t_philosopher *)arg;
 	data = philo->data;
 	if (philo->id % 2 != 0)
-		precise_usleep(1000);
+		precise_usleep(250);
 	while (!check_stop_simulation(data))
 	{
 		if (philo_eat(philo) != 0)
@@ -87,6 +88,7 @@ void	*philo_lifecycle(void *arg)
 		print_status(data, philo->id, "is sleeping");
 		precise_usleep(data->time_to_sleep * 1000);
 		print_status(data, philo->id, "is thinking");
+		precise_usleep(1000);
 	}
 	return (NULL);
 }

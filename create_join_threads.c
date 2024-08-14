@@ -6,11 +6,11 @@
 /*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 20:49:38 by sruff             #+#    #+#             */
-/*   Updated: 2024/08/14 21:29:58 by sruff            ###   ########.fr       */
+/*   Updated: 2024/08/14 22:10:25 by sruff            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo_test.h"
+#include "philo.h"
 
 int	initialize_simulation(t_data *data, pthread_t **threads, int argc,
 	char **argv)

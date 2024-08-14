@@ -6,11 +6,11 @@
 /*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 20:56:39 by sruff             #+#    #+#             */
-/*   Updated: 2024/08/14 20:57:43 by sruff            ###   ########.fr       */
+/*   Updated: 2024/08/14 22:09:12 by sruff            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo_test.h"
+#include "philo.h"
 
 int	check_stop_simulation(t_data *data)
 {

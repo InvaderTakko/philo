@@ -6,11 +6,11 @@
 /*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 20:21:15 by sruff             #+#    #+#             */
-/*   Updated: 2024/08/14 21:07:24 by sruff            ###   ########.fr       */
+/*   Updated: 2024/08/14 22:10:09 by sruff            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo_test.h"
+#include "philo.h"
 
 void	cleanup(t_data *data, pthread_t *threads)
 {
@@ -76,8 +76,6 @@ static int	init_philo(t_data *data)
 
 int	init_data(t_data *data, int argc, char **argv)
 {
-	int	i;
-
 	data->num_philosophers = ft_atoi(argv[1]);
 	data->philosophers = malloc(sizeof(t_philosopher) * data->num_philosophers);
 	if (!data->philosophers)
