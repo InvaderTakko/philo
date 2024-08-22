@@ -6,7 +6,7 @@
 /*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 20:17:57 by sruff             #+#    #+#             */
-/*   Updated: 2024/08/22 14:05:38 by sruff            ###   ########.fr       */
+/*   Updated: 2024/08/22 16:27:34 by sruff            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ static int	is_valid_integer(const char *str)
 	}
 	return (1);
 }
-
 
 int	ft_atoi(const char *str)
 {

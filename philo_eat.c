@@ -6,7 +6,7 @@
 /*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 21:13:08 by sruff             #+#    #+#             */
-/*   Updated: 2024/08/15 00:05:26 by sruff            ###   ########.fr       */
+/*   Updated: 2024/08/22 16:27:21 by sruff            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,10 +75,8 @@ int	philo_eat(t_philosopher *philo)
 {
 	if (philo->data->num_philosophers == 1)
 		return (handle_single_philosopher(philo));
-
 	take_forks(philo);
 	eat(philo);
 	release_forks(philo);
-
 	return (0);
 }

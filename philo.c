@@ -6,7 +6,7 @@
 /*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/29 15:18:03 by sruff             #+#    #+#             */
-/*   Updated: 2024/08/22 14:17:44 by sruff            ###   ########.fr       */
+/*   Updated: 2024/08/22 16:46:33 by sruff            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 
 static int	check_philosopher_status(t_data *data, int i, long long time)
 {
-	// time = get_time();
 	if (time - data->philosophers[i].last_meal_time >= data->time_to_die)
 	{
 		print_status(data, i, "died");
@@ -101,7 +100,11 @@ int	main(int argc, char **argv)
 
 	if (argc != 5 && argc != 6)
 	{
-		printf("Usage:%s number_of_philosophers time_to_die time_to_eat time_to_sleep[number_of_times_each_philosopher_must_eat]\n ",
+		printf("Usage: %s "
+			"number_of_philosophers "
+			"time_to_die time_to_eat "
+			"time_to_sleep "
+			"[number_of_times_each_philosopher_must_eat]\n",
 			argv[0]);
 		return (1);
 	}
