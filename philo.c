@@ -6,7 +6,7 @@
 /*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/29 15:18:03 by sruff             #+#    #+#             */
-/*   Updated: 2024/08/15 00:15:53 by sruff            ###   ########.fr       */
+/*   Updated: 2024/08/22 14:17:44 by sruff            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ void	*philo_lifecycle(void *arg)
 		print_status(data, philo->id, "is sleeping");
 		precise_usleep(data->time_to_sleep * 1000);
 		print_status(data, philo->id, "is thinking");
-		precise_usleep(1000);
+		usleep(1000);
 	}
 	return (NULL);
 }
@@ -105,6 +105,8 @@ int	main(int argc, char **argv)
 			argv[0]);
 		return (1);
 	}
+	if (!validate_arguments(argc, argv))
+		return (1);
 	if (!initialize_simulation(&data, &threads, argc, argv))
 		return (1);
 	if (!start_monitor(&data, &monitor_thread))

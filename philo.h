@@ -6,7 +6,7 @@
 /*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/29 15:17:58 by sruff             #+#    #+#             */
-/*   Updated: 2024/08/14 21:37:28 by sruff            ###   ########.fr       */
+/*   Updated: 2024/08/22 13:49:07 by sruff            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ typedef struct s_data
 }	t_data;
 
 int					ft_atoi(const char *str);
+int					validate_arguments(int argc, char **argv);
 long long			get_time(void);
 void				precise_usleep(unsigned long usec);
 int					check_stop_simulation(t_data *data);
