@@ -6,7 +6,7 @@
 #    By: sruff <sruff@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/06/29 15:18:08 by sruff             #+#    #+#              #
-#    Updated: 2024/08/22 13:35:23 by sruff            ###   ########.fr        #
+#    Updated: 2024/08/26 14:03:42 by sruff            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,15 +24,15 @@ all: $(NAME)
 	@$(CC) $(CFLAGS) -o $@ -c $< $(HEADERS) && printf "Compiling: $(notdir $<)\n"
 	
 $(NAME): $(OBJS)
-	@$(CC) $(OBJS) -o $(NAME)
+	$(CC) $(OBJS) -o $(NAME)
 	@echo "Compilation complete. Executable '$(NAME)' created."
 	
 clean:
-	@rm -f $(OBJS)
+	rm -f $(OBJS)
 	@echo "Object files removed."
 	
 fclean: clean
-	@rm -f $(NAME)
+	rm -f $(NAME)
 	@echo "Executable '$(NAME)' removed."
 	
 re: fclean all
