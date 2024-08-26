@@ -6,7 +6,7 @@
 /*   By: sruff <sruff@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/14 20:17:57 by sruff             #+#    #+#             */
-/*   Updated: 2024/08/22 16:27:34 by sruff            ###   ########.fr       */
+/*   Updated: 2024/08/26 14:00:14 by sruff            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,9 +66,14 @@ int	validate_arguments(int argc, char **argv)
 	i = 1;
 	while (i < argc)
 	{
+		if (ft_atoi(argv[1]) > 200)
+		{
+			printf("Error: Number of philosophers cant be greater than 200\n");
+			return (0);
+		}
 		if (!is_valid_integer(argv[i]) || ft_atoi(argv[i]) <= 0)
 		{
-			printf("Error: Argument %d is not a valid integer.\n", i);
+			printf("Error: Argument %d is not a positive integer.\n", i);
 			return (0);
 		}
 		i++;
